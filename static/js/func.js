@@ -1,12 +1,24 @@
 $(document).ready(function() {
-	$('#btntest').click(function() {
+	$('#btnlogin').click(function() {
 		$.ajax({
 			type: 'POST',
 			url: '/login',
 	//		async: false,
 			success: function(result) {
-				$('#output').text(result);
+				$('#loginoutput').text(result);
 			}
 		});
 	});
+	$('#btndownload').click(function() {
+		$.ajax({
+			type: 'POST',
+			url: '/download',
+	//		async: false,
+			success: function(result) {
+				$('#downloadoutput').text(result);
+			}
+		});
+	});
+
+
 });

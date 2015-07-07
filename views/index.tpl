@@ -8,8 +8,12 @@
   </head>
   <body>
   <div>
-  <button id="btntest">Login</button>
-  <p id = "output"></p>
+  <button id="btnlogin">Login</button>
+  <p id = "loginoutput"></p>
+  <br>
+  <button id="btndownload">Download</button>
+  <p id = "downloadoutput"></p>
+
   </div>
   </body>
 </html>

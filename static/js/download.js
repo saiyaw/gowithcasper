@@ -15,14 +15,27 @@ var result = 0;
 
 var bHaveImage = true;
 
+var urls = [];
+
+
 //fs.removeTree(resourceDirectory);
 
 var user = casper.cli.get("user") || "admin";
 var password = casper.cli.get("password") || "admin123";
 
+var start_node = casper.cli.get("start") || 1;
+var end_node = casper.cli.get("end") || 100;
+
 function saveimage(filename) {
 	if (bHaveImage) {
 		casper.capture(resourceDirectory + filename + '.png');
+	}
+}
+
+function downloadPage(url){
+	if(bHaveImage){
+		var id = url.substr(url.lastIndexOf("/")+1);
+		casper.download(url, resourceDirectory + id + ".html");
 	}
 }
 
@@ -75,7 +88,25 @@ casper.then(function() {
 	}
 });
 
-casper.run(function() {
+casper.then(function() {
+	var base_url = "http://10.243.119.113/covidien/node/";
+	for (var i = start_node; i < end_node; i++) {
+		urls.push(base_url + i);
+	}
+	//	this.echo(urls);
+	casper.each(urls, function(self, link) {
+		self.thenOpen(link, function() {
+//			this.echo(this.getCurrentUrl());
+			downloadPage(link);
+		})
+	});
+
+	result = 1;
+});
+
+
+
+casper.run(function(){
 	this.echo(result);
 	this.exit(result);
 });
