@@ -1,7 +1,7 @@
 phantom.outputEncoding = "GBK";
 var casper = new require('casper').create({
 	verbose: true,
-//	logLevel: "debug",
+	//	logLevel: "debug",
 	viewportSize: {
 		width: 1920,
 		height: 1200
@@ -32,10 +32,11 @@ function saveimage(filename) {
 	}
 }
 
-function downloadPage(url){
-	if(bHaveImage){
-		var id = url.substr(url.lastIndexOf("/")+1);
+function downloadPage(url) {
+	if (bHaveImage) {
+		var id = url.substr(url.lastIndexOf("/") + 1);
 		casper.download(url, resourceDirectory + id + ".html");
+//		casper.echo(url + "...downloaded");
 	}
 }
 
@@ -93,11 +94,12 @@ casper.then(function() {
 	for (var i = start_node; i < end_node; i++) {
 		urls.push(base_url + i);
 	}
-	//	this.echo(urls);
+//	this.echo(urls);
 	casper.each(urls, function(self, link) {
 		self.thenOpen(link, function() {
-//			this.echo(this.getCurrentUrl());
+
 			downloadPage(link);
+			self.echo(link + "... is downloaded");
 		})
 	});
 
@@ -106,7 +108,7 @@ casper.then(function() {
 
 
 
-casper.run(function(){
-	this.echo(result);
+casper.run(function() {
+	this.echo("Done:" + start_node+"-"+end_node);
 	this.exit(result);
 });

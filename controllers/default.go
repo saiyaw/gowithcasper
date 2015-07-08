@@ -1,8 +1,11 @@
 package controllers
 
 import (
+	"bufio"
+	"log"
 	"os"
 	"os/exec"
+	"strconv"
 	"sync"
 
 	"github.com/astaxie/beego"
@@ -30,30 +33,57 @@ func (c *MainController) PostLoginCommand() {
 	c.Ctx.WriteString(string(scrape))
 }
 
-func exeCommand(start string, end string, wg *sync.WaitGroup) {
-	wd, _ := os.Getwd()
-	cmd := wd + "/static/js/download.js --start=" + start + " --end=" + end
-	beego.Debug(cmd)
-	scrapeCmd := exec.Command("casperjs", cmd)
-	scrape, err := scrapeCmd.Output()
-	beego.Debug(scrape)
+func checkError(err error) {
 	if err != nil {
-		panic(err)
+		log.Fatalf("Error: %s", err)
 	}
+}
+
+func exeCommand(start int, end int, wg *sync.WaitGroup) {
+	wd, _ := os.Getwd()
+	cmdstr := wd + "/static/js/download.js --start=" + strconv.Itoa(start) + " --end=" + strconv.Itoa(end)
+	beego.Debug(cmdstr)
+	cmd := exec.Command("casperjs", cmdstr)
+	stdout, err := cmd.StdoutPipe()
+	checkError(err)
+	scanner_out := bufio.NewScanner(stdout)
+	go func() {
+		for scanner_out.Scan() {
+			beego.Debug(scanner_out.Text())
+		}
+	}()
+	stderr, err := cmd.StderrPipe()
+	checkError(err)
+	scanner_err := bufio.NewScanner(stderr)
+	go func() {
+		for scanner_err.Scan() {
+			beego.Debug(scanner_err.Text())
+		}
+	}()
+
+	err = cmd.Start()
+	checkError(err)
+
+	defer cmd.Wait()
+
+	// 	go io.Copy(os.Stdout, stdout)
+	// 	go io.Copy(os.Stderr, stderr)
 	wg.Done()
 }
 
 func (c *MainController) PostDownloadCommand() {
 	wg := new(sync.WaitGroup)
-	wg.Add(8)
-	go exeCommand("101", "200", wg)
-	go exeCommand("201", "300", wg)
-	go exeCommand("301", "400", wg)
-	go exeCommand("401", "500", wg)
-	go exeCommand("501", "600", wg)
-	go exeCommand("601", "700", wg)
-	go exeCommand("701", "800", wg)
-	go exeCommand("801", "900", wg)
+	num := 8
+
+	wg.Add(num)
+
+	start := 1
+
+	for i := 0; i < num; i++ {
+		end := start + 100
+		go exeCommand(start, end, wg)
+		start = end
+	}
 
 	wg.Wait()
 

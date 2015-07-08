@@ -13,7 +13,7 @@ $(document).ready(function() {
 		$.ajax({
 			type: 'POST',
 			url: '/download',
-	//		async: false,
+			async: false,
 			success: function(result) {
 				$('#downloadoutput').text(result);
 			}
